@@ -8,7 +8,7 @@ from df_engine.core.context import Context
 from df_db_connector import JSONConnector
 from df_db_connector import PickleConnector
 from df_db_connector import DBConnector, DBAbstractConnector
-from df_db_connector import SQLConnector, postgres_available, mysql_available, sqlite_available
+from df_db_connector import SQLConnector, YDBConnector, postgres_available, mysql_available, sqlite_available
 from df_db_connector import connector_factory
 
 
@@ -27,6 +27,8 @@ def ping_localhost(port: int, timeout=3):
 POSTGRES_ACTIVE = ping_localhost(5432)
 
 MYSQL_ACTIVE = ping_localhost(3307)
+
+YDB_ACTIVE = ping_localhost(2136)
 
 
 def generic_test(connector_instance, testing_context, testing_telegram_id):
@@ -92,5 +94,13 @@ def test_mysql(testing_context, testing_telegram_id):
         "mysql+pymysql://{}:{}@localhost:3307/{}".format(
             os.getenv("MYSQL_USERNAME"), os.getenv("MYSQL_PASSWORD"), "test"
         )
+    )
+    generic_test(connector_instance, testing_context, testing_telegram_id)
+
+
+@pytest.mark.skipif(YDB_ACTIVE == False, reason="YQL server not running")
+def test_ydb(testing_context, testing_telegram_id):
+    connector_instance = YDBConnector(
+        "grpc://localhost:2136/local", "test"
     )
     generic_test(connector_instance, testing_context, testing_telegram_id)

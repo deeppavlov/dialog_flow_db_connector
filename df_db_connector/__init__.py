@@ -11,6 +11,7 @@ from .db_connector import DBAbstractConnector, DBConnector, threadsafe_method
 from .json_connector import JSONConnector
 from .pickle_connector import PickleConnector
 from .sql_connector import SQLConnector, postgres_available, sqlite_available, mysql_available
+from .ydb_connector import YDBConnector
 
 
 def connector_factory(path: str, **kwargs):
@@ -34,6 +35,7 @@ def connector_factory(path: str, **kwargs):
         "mysql": {"module": "sql_connector", "class": "SQLConnector"},
         "postgresql": {"module": "sql_connector", "class": "SQLConnector"},
         "sqlite": {"module": "sql_connector", "class": "SQLConnector"},
+        "grpc": {"module": "ydb_connector", "class": "YDBConnector"}
     }
     prefix, _, _ = path.partition("://")
     if "sql" in prefix:
