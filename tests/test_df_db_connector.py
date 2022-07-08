@@ -100,7 +100,5 @@ def test_mysql(testing_context, testing_telegram_id):
 
 @pytest.mark.skipif(YDB_ACTIVE == False, reason="YQL server not running")
 def test_ydb(testing_context, testing_telegram_id):
-    connector_instance = YDBConnector(
-        "grpc://localhost:2136/local", "test"
-    )
+    connector_instance = YDBConnector("grpc://localhost:2136/local", "test")
     generic_test(connector_instance, testing_context, testing_telegram_id)
