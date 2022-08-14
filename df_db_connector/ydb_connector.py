@@ -59,7 +59,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS String;
                 DECLARE $queryContext AS Json;
 
                 UPSERT INTO {}
@@ -79,7 +79,7 @@ class YDBConnector(DBConnector):
 
             session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
-                {"$queryId": int(key), "$queryContext": json.dumps(value)},
+                {"$queryId": str(key), "$queryContext": json.dumps(value)},
                 commit_tx=True,
             )
 
@@ -90,7 +90,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS String;
 
                 SELECT
                     id,
@@ -105,7 +105,7 @@ class YDBConnector(DBConnector):
             result_sets = session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {
-                    "$queryId": int(key),
+                    "$queryId": str(key),
                 },
                 commit_tx=True,
             )
@@ -121,7 +121,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS String;
 
                 DELETE
                 FROM {}
@@ -135,7 +135,7 @@ class YDBConnector(DBConnector):
 
             session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
-                {"$queryId": int(key)},
+                {"$queryId": str(key)},
                 commit_tx=True,
             )
 
@@ -149,7 +149,7 @@ class YDBConnector(DBConnector):
             # otherwise exception will be raised
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS String;
 
                 SELECT
                     id,
@@ -164,7 +164,7 @@ class YDBConnector(DBConnector):
             result_sets = session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {
-                    "$queryId": int(key),
+                    "$queryId": str(key),
                 },
                 commit_tx=True,
             )
@@ -199,7 +199,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS String;
 
                 DELETE
                 FROM {}
@@ -255,7 +255,7 @@ class YDBConnector(DBConnector):
             session.create_table(
                 os.path.join(path, table_name),
                 ydb.TableDescription()
-                .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Uint64)))
+                .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.String)))
                 .with_column(ydb.Column("context", ydb.OptionalType(ydb.PrimitiveType.Json)))
                 .with_primary_key("id"),
             )
