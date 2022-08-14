@@ -12,6 +12,14 @@ import os
 import json
 from urllib.parse import urlsplit
 import ydb
+from uuid import UUID
+
+
+class UUIDEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, UUID):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 class YDBConnector(DBConnector):
@@ -79,7 +87,7 @@ class YDBConnector(DBConnector):
 
             session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
-                {"$queryId": str(key), "$queryContext": json.dumps(value)},
+                {"$queryId": str(key), "$queryContext": json.dumps(value, cls=UUIDEncoder)},
                 commit_tx=True,
             )
 
