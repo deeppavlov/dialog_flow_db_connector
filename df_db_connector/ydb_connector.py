@@ -59,7 +59,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS String;
+                DECLARE $queryId AS Utf8;
                 DECLARE $queryContext AS Json;
 
                 UPSERT INTO {}
@@ -90,7 +90,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS String;
+                DECLARE $queryId AS Utf8;
 
                 SELECT
                     id,
@@ -121,7 +121,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS String;
+                DECLARE $queryId AS Utf8;
 
                 DELETE
                 FROM {}
@@ -149,7 +149,7 @@ class YDBConnector(DBConnector):
             # otherwise exception will be raised
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS String;
+                DECLARE $queryId AS Utf8;
 
                 SELECT
                     id,
@@ -199,7 +199,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS String;
+                DECLARE $queryId AS Utf8;
 
                 DELETE
                 FROM {}
@@ -255,7 +255,7 @@ class YDBConnector(DBConnector):
             session.create_table(
                 os.path.join(path, table_name),
                 ydb.TableDescription()
-                .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.String)))
+                .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Utf8)))
                 .with_column(ydb.Column("context", ydb.OptionalType(ydb.PrimitiveType.Json)))
                 .with_primary_key("id"),
             )
