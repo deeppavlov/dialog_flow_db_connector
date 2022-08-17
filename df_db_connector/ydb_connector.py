@@ -11,7 +11,13 @@ from df_engine.core.context import Context
 import os
 import json
 from urllib.parse import urlsplit
-import ydb
+
+
+try:
+    import ydb
+    ydb_available = True
+except ImportError:
+    ydb_available = False
 
 
 class YDBConnector(DBConnector):
@@ -33,6 +39,8 @@ class YDBConnector(DBConnector):
         super(YDBConnector, self).__init__(path)
         _, self.entrypoint, self.table_path, _, _ = urlsplit(path)
         self.table_name = table_name
+        if not ydb_available:
+            raise ImportError("`ydb` package is missing.")
 
         self.driver_config = ydb.DriverConfig(
             self.entrypoint,

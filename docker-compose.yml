@@ -1,29 +1,37 @@
 version: "3.9"
 services:
   mysql:
+    env_file: [.env_file]
     image: mysql:latest
     restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: test
-      MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
     ports:
-      - '3307:3306'
+      - 3307:3306
   psql:
+    env_file: [.env_file]
     image: postgres:latest
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: $PG_USERNAME
-      POSTGRES_PASSWORD: $PG_PASSWORD
-      POSTGRES_DB: test
     ports:
-      - '5432:5432'
+      - 5432:5432
+  redis:
+    env_file: [.env_file]
+    image: redis:latest
+    restart: unless-stopped
+    command: --requirepass pass
+    ports:
+      - 6379:6379
+  mongo:
+    env_file: [.env_file]
+    image: mongo:latest
+    restart: unless-stopped
+    ports:
+      - 27017:27017
   ydb-local:
     image: cr.yandex/yc/yandex-docker-local-ydb:latest
     restart: unless-stopped
     ports:
-      - '2136:2136'
-      - '2135:2135'
-      - '8765:8765'
+      - 2136:2136
+      - 2135:2135
+      - 8765:8765
     volumes:
       - 'ydb_certs:/ydb_certs'
       - 'ydb_data:/ydb_data'
@@ -33,6 +41,7 @@ services:
       GRPC_TLS_PORT: 2135
       GRPC_PORT: 2136
       MON_PORT: 8765
+
 volumes:
   ydb_certs:
   ydb_data:
