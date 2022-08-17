@@ -10,8 +10,5 @@ redis>=4.1.2
 pymongo>=4.0.2
 bson>=0.5.10
 cryptography>=36.0.2
-<<<<<<< HEAD
 ydb>=2.5.0
-=======
 sqlalchemy>=1.4.27
->>>>>>> dev

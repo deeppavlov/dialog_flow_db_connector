@@ -11,12 +11,9 @@ from .db_connector import DBAbstractConnector, DBConnector, threadsafe_method
 from .json_connector import JSONConnector
 from .pickle_connector import PickleConnector
 from .sql_connector import SQLConnector, postgres_available, sqlite_available, mysql_available
-<<<<<<< HEAD
 from .ydb_connector import YDBConnector
-=======
 from .redis_connector import RedisConnector
 from .mongo_connector import MongoConnector
->>>>>>> dev
 
 
 def connector_factory(path: str, **kwargs):
