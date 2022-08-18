@@ -96,7 +96,7 @@ class SQLConnector(DBConnector):
         self.table = Table(
             table_name,
             self.metadata,
-            Column("id", String, **id_column_args),
+            Column("id", String(36), **id_column_args),
             Column("context", JSON),  # column for storing serialized contexts
         )
 
@@ -151,7 +151,7 @@ class SQLConnector(DBConnector):
 
     @threadsafe_method
     def clear(self) -> None:
-        stmt = delete(self.table).where(self.table.c.id > 0)
+        stmt = delete(self.table)
         with self.engine.connect() as conn:
             conn.execute(stmt)
 
