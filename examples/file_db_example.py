@@ -15,6 +15,7 @@ db = connector_factory("json://dbs/file.json")
 # db = connector_factory("pickle://dbs/file.pkl")
 # db = connector_factory("shelve://dbs/file")
 
+
 def main(actor):
     while True:
         in_request = input("type your answer: ")

@@ -40,7 +40,8 @@ script = {
 
 actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
-def run_actor(in_request: str, actor: Actor, db: DBConnector, user_id = str(random.randint(0, 100))):
+
+def run_actor(in_request: str, actor: Actor, db: DBConnector, user_id=str(random.randint(0, 100))):
     ctx = db.get(user_id, Context(id=user_id))
     ctx.add_request(in_request)
     ctx = actor(ctx)
