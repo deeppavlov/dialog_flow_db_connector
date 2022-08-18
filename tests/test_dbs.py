@@ -46,7 +46,7 @@ def generic_test(connector_instance, testing_context, context_id):
     connector_instance.clear()
     assert len(connector_instance) == 0
     # test write operations
-    connector_instance[context_id] = Context()
+    connector_instance[context_id] = Context(id=context_id)
     assert context_id in connector_instance
     assert len(connector_instance) == 1
     connector_instance[context_id] = testing_context  # overwriting a key
@@ -54,7 +54,7 @@ def generic_test(connector_instance, testing_context, context_id):
     # test read operations
     new_ctx = connector_instance[context_id]
     assert isinstance(new_ctx, Context)
-    assert new_ctx.dict() == testing_context.dict()
+    assert {**new_ctx.dict(), "id": str(new_ctx.id)} == {**testing_context.dict(), "id": str(testing_context.id)}
     # test delete operations
     del connector_instance[context_id]
     assert context_id not in connector_instance
