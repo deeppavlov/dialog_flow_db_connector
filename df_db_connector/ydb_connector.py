@@ -11,8 +11,14 @@ from df_engine.core.context import Context
 import os
 import json
 from urllib.parse import urlsplit
-import ydb
 from uuid import UUID
+
+try:
+    import ydb
+
+    ydb_available = True
+except ImportError:
+    ydb_available = False
 
 
 class UUIDEncoder(json.JSONEncoder):
@@ -37,24 +43,29 @@ class YDBConnector(DBConnector):
         The name of the table to use.
     """
 
-    def __init__(self, path: str, table_name: str = "contexts"):
+    def __init__(self, path: str, table_name: str = "contexts", timeout=5):
         super(YDBConnector, self).__init__(path)
-        _, self.entrypoint, self.table_path, _, _ = urlsplit(path)
+        protocol, netloc, self.database, _, _ = urlsplit(path)
+        self.endpoint = f"{protocol}://{netloc}"
         self.table_name = table_name
+        if not ydb_available:
+            raise ImportError("`ydb` package is missing.")
 
-        self.driver_config = ydb.DriverConfig(
-            self.entrypoint,
-            self.table_path,
-            root_certificates=ydb.load_ydb_root_certificate(),
-        )
+        print(f"{self.endpoint=}")
+        print(f"{self.database=}")
+        # self.driver_config = ydb.DriverConfig(
+        #     self.endpoint,
+        #     self.database,
+        #     root_certificates=ydb.load_ydb_root_certificate(),
+        # )
 
-        self.driver = ydb.Driver(self.driver_config)
-        self.driver.wait(timeout=5, fail_fast=True)
+        self.driver = ydb.Driver(endpoint=self.endpoint, database=self.database)
+        self.driver.wait(timeout=timeout, fail_fast=True)
 
         self.pool = ydb.SessionPool(self.driver)
 
-        if not self._is_table_exists(self.pool, self.table_path, self.table_name):  # create table if it does not exist
-            self._create_table(self.pool, self.table_path, self.table_name)
+        if not self._is_table_exists(self.pool, self.database, self.table_name):  # create table if it does not exist
+            self._create_table(self.pool, self.database, self.table_name)
 
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
@@ -81,7 +92,7 @@ class YDBConnector(DBConnector):
                     $queryContext
                 );
                 """.format(
-                self.table_path, self.table_name
+                self.database, self.table_name
             )
             prepared_query = session.prepare(query)
 
@@ -106,7 +117,7 @@ class YDBConnector(DBConnector):
                 FROM {}
                 WHERE id = $queryId;
                 """.format(
-                self.table_path, self.table_name
+                self.database, self.table_name
             )
             prepared_query = session.prepare(query)
 
@@ -137,7 +148,7 @@ class YDBConnector(DBConnector):
                     id = $queryId
                 ;
                 """.format(
-                self.table_path, self.table_name
+                self.database, self.table_name
             )
             prepared_query = session.prepare(query)
 
@@ -165,7 +176,7 @@ class YDBConnector(DBConnector):
                 FROM {}
                 WHERE id = $queryId;
                 """.format(
-                self.table_path, self.table_name
+                self.database, self.table_name
             )
             prepared_query = session.prepare(query)
 
@@ -190,7 +201,7 @@ class YDBConnector(DBConnector):
                     COUNT(*) as cnt
                 FROM {}
                 """.format(
-                self.table_path, self.table_name
+                self.database, self.table_name
             )
             prepared_query = session.prepare(query)
 
@@ -215,7 +226,7 @@ class YDBConnector(DBConnector):
                     id > 0
                 ;
                 """.format(
-                self.table_path, self.table_name
+                self.database, self.table_name
             )
             prepared_query = session.prepare(query)
 

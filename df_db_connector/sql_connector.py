@@ -7,12 +7,13 @@ sql_connector
 
 """
 import importlib
+import json
 
 from .db_connector import DBConnector, threadsafe_method
 from df_engine.core.context import Context
 
 try:
-    from sqlalchemy import create_engine, Table, MetaData, Column, JSON, Integer, inspect, select, delete, func
+    from sqlalchemy import create_engine, Table, MetaData, Column, JSON, String, inspect, select, delete, func
 
     sqlalchemy_available = True
 except (ImportError, ModuleNotFoundError):
@@ -96,7 +97,7 @@ class SQLConnector(DBConnector):
         self.table = Table(
             table_name,
             self.metadata,
-            Column("id", Integer, **id_column_args),
+            Column("id", String(36), **id_column_args),
             Column("context", JSON),  # column for storing serialized contexts
         )
 
@@ -107,13 +108,10 @@ class SQLConnector(DBConnector):
 
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
-        if isinstance(value, Context):
-            value = value.dict()
+        value = value if isinstance(value, Context) else Context(value)
+        value = json.loads(value.json())
 
-        if not isinstance(value, dict):
-            raise TypeError(f"The saved value should be a dict or a dict-serializeable item, not {type(value)}")
-
-        insert_stmt = insert(self.table).values(id=int(key), context=value)
+        insert_stmt = insert(self.table).values(id=str(key), context=value)
         update_stmt = self._get_update_stmt(insert_stmt)
 
         with self.engine.connect() as conn:
@@ -151,7 +149,7 @@ class SQLConnector(DBConnector):
 
     @threadsafe_method
     def clear(self) -> None:
-        stmt = delete(self.table).where(self.table.c.id > 0)
+        stmt = delete(self.table)
         with self.engine.connect() as conn:
             conn.execute(stmt)
 
