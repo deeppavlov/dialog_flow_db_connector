@@ -11,7 +11,7 @@ from df_engine.core.context import Context
 import os
 import json
 from urllib.parse import urlsplit
-
+from uuid import UUID
 
 try:
     import ydb
@@ -19,6 +19,13 @@ try:
     ydb_available = True
 except ImportError:
     ydb_available = False
+
+
+class UUIDEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, UUID):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 class YDBConnector(DBConnector):
@@ -71,7 +78,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS Utf8;
                 DECLARE $queryContext AS Json;
 
                 UPSERT INTO {}
@@ -91,7 +98,7 @@ class YDBConnector(DBConnector):
 
             session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
-                {"$queryId": int(key), "$queryContext": json.dumps(value)},
+                {"$queryId": str(key), "$queryContext": json.dumps(value, cls=UUIDEncoder)},
                 commit_tx=True,
             )
 
@@ -102,7 +109,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS Utf8;
 
                 SELECT
                     id,
@@ -117,7 +124,7 @@ class YDBConnector(DBConnector):
             result_sets = session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {
-                    "$queryId": int(key),
+                    "$queryId": str(key),
                 },
                 commit_tx=True,
             )
@@ -133,7 +140,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS Utf8;
 
                 DELETE
                 FROM {}
@@ -147,7 +154,7 @@ class YDBConnector(DBConnector):
 
             session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
-                {"$queryId": int(key)},
+                {"$queryId": str(key)},
                 commit_tx=True,
             )
 
@@ -161,7 +168,7 @@ class YDBConnector(DBConnector):
             # otherwise exception will be raised
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS Utf8;
 
                 SELECT
                     id,
@@ -176,7 +183,7 @@ class YDBConnector(DBConnector):
             result_sets = session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {
-                    "$queryId": int(key),
+                    "$queryId": str(key),
                 },
                 commit_tx=True,
             )
@@ -211,7 +218,7 @@ class YDBConnector(DBConnector):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Uint64;
+                DECLARE $queryId AS Utf8;
 
                 DELETE
                 FROM {}
@@ -267,7 +274,7 @@ class YDBConnector(DBConnector):
             session.create_table(
                 os.path.join(path, table_name),
                 ydb.TableDescription()
-                .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Uint64)))
+                .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Utf8)))
                 .with_column(ydb.Column("context", ydb.OptionalType(ydb.PrimitiveType.Json)))
                 .with_primary_key("id"),
             )
