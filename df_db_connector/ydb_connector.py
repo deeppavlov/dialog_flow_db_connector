@@ -51,14 +51,6 @@ class YDBConnector(DBConnector):
         if not ydb_available:
             raise ImportError("`ydb` package is missing.")
 
-        print(f"{self.endpoint=}")
-        print(f"{self.database=}")
-        # self.driver_config = ydb.DriverConfig(
-        #     self.endpoint,
-        #     self.database,
-        #     root_certificates=ydb.load_ydb_root_certificate(),
-        # )
-
         self.driver = ydb.Driver(endpoint=self.endpoint, database=self.database)
         self.driver.wait(timeout=timeout, fail_fast=True)
 
@@ -69,11 +61,8 @@ class YDBConnector(DBConnector):
 
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
-        if isinstance(value, Context):
-            value = value.dict()
 
-        if not isinstance(value, dict):
-            raise TypeError(f"The saved value should be a dict or a dict-serializeable item, not {type(value)}")
+        value = value if isinstance(value, Context) else Context(value)
 
         def callee(session):
             query = """
@@ -98,7 +87,7 @@ class YDBConnector(DBConnector):
 
             session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
-                {"$queryId": str(key), "$queryContext": json.dumps(value, cls=UUIDEncoder)},
+                {"$queryId": str(key), "$queryContext": value.json()},
                 commit_tx=True,
             )
 
@@ -222,8 +211,6 @@ class YDBConnector(DBConnector):
 
                 DELETE
                 FROM {}
-                WHERE
-                    id > 0
                 ;
                 """.format(
                 self.database, self.table_name
