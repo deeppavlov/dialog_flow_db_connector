@@ -41,6 +41,7 @@ def connector_factory(path: str, **kwargs):
         "postgresql": {"module": "sql_connector", "class": "SQLConnector"},
         "sqlite": {"module": "sql_connector", "class": "SQLConnector"},
         "grpc": {"module": "ydb_connector", "class": "YDBConnector"},
+        "grpcs": {"module": "ydb_connector", "class": "YDBConnector"},
     }
     prefix, _, _ = path.partition("://")
     if "sql" in prefix:
