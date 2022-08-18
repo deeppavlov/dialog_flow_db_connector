@@ -14,6 +14,7 @@ pathlib.Path("dbs").mkdir(exist_ok=True)
 db = connector_factory("json://dbs/file.json")
 # db = connector_factory("pickle://dbs/file.pkl")
 # db = connector_factory("shelve://dbs/file")
+# db = connector_factory("shelve://dbs/file")
 
 
 def main(actor):

@@ -1,6 +1,4 @@
 import logging
-from typing import Optional
-import os
 import random
 
 from df_engine import responses as rsp

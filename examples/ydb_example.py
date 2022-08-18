@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 import os
 
 from df_engine.core import Actor
@@ -19,8 +18,9 @@ actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_labe
 # export YDB_DATABASE=/ru-central1/qwertyuiopasdfgh/123456789qwertyui
 ###### or use local-ydb with variables from .env_file
 
-uri = f'{os.getenv("YDB_ENDPOINT")}{os.getenv("YDB_DATABASE")}'
-db = connector_factory(uri)
+# db_uri="grpc://localhost:2136/local"
+db_uri = f'{os.getenv("YDB_ENDPOINT")}{os.getenv("YDB_DATABASE")}'
+db = connector_factory(db_uri)
 
 
 def main(actor):
